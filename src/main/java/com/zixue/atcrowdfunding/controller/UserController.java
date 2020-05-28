@@ -1,15 +1,21 @@
 package com.zixue.atcrowdfunding.controller;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.activiti.engine.impl.cmd.AddCommentCmd;
+import org.activiti.engine.impl.cmd.DeleteUserCmd;
+import org.apache.ibatis.annotations.Insert;
 import org.apache.poi.ss.formula.functions.Index;
+import org.h2.util.New;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.remoting.support.RemoteInvocationResult;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -25,6 +31,57 @@ public class UserController {
 	
 	@Autowired
 	private UserService userService;
+	
+	@ResponseBody
+	@RequestMapping("deleteUser")
+	public Object deleteUser(Integer id){
+		AjaxResult result = new AjaxResult();
+		try {
+			userService.deleteUserById(id);
+			result.setSuccess(true);
+		} catch (Exception e) {
+			result.setSuccess(false);
+			e.printStackTrace();
+		}
+		return result;
+	}
+	
+	@ResponseBody
+	@RequestMapping("updateUser")
+	public Object updateUser(User user){
+		AjaxResult result = new AjaxResult();
+		try {
+			userService.updateUser(user);
+			result.setSuccess(true);
+		} catch (Exception e) {
+			e.printStackTrace();
+			result.setSuccess(false);
+		}
+		return result;
+	}
+	
+	@RequestMapping("edit")
+	public String edit(Integer id, Model model){
+		User user = userService.queryById(id);
+		model.addAttribute("user", user);
+		return "user/edit";
+	}
+	
+	@ResponseBody
+	@RequestMapping("insert")
+	public Object insert(User user){
+		AjaxResult result = new AjaxResult();
+		try {
+			user.setUserpswd("123456");
+			user.setCreatetime(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
+			userService.insertUser(user);
+			result.setSuccess(true);
+		} catch (Exception e) {
+			e.printStackTrace();
+			result.setSuccess(false);
+		}
+		return result;
+	}
 	
 	@RequestMapping("/add")
 	public String add(){

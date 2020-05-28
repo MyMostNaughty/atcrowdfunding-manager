@@ -35,4 +35,25 @@ public class UserServiceImpl implements UserService {
 	public int pageQueryCount(Map<String, Object> map) {
 		return userDao.pageQueryCount(map);
 	}
+
+	@Override
+	public void insertUser(User user) {
+		userDao.insertUser(user);
+	}
+
+	@Override
+	public User queryById(Integer id) {
+		return userDao.queryById(id);
+	}
+
+	@Override
+	public void updateUser(User user) {
+		userDao.updateUser(user);
+		
+	}
+
+	@Override
+	public void deleteUserById(Integer id) {
+		userDao.deleteUserById(id);
+	}
 }

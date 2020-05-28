@@ -10,6 +10,7 @@
 			   and loginacct like concat('%', #{queryText}, '%')
 	   		</if>
 	   </where>
+	   order by createtime desc
 	   limit #{start},#{size}
 	</select>
 	
@@ -22,4 +23,22 @@
 	   		</if>
 		</where>
 	</select>
+	
+	<insert id="insertUser">
+		insert into t_user (
+			loginacct, username, userpswd, email, createtime
+		) values (
+			#{loginacct},#{username},#{userpswd},#{email},#{createtime}
+		);
+	</insert>
+	
+	<update id="updateUser">
+		update t_user 
+		set loginacct = #{loginacct}, username = #{username}, email = #{email}
+		where id = #{id} 
+	</update>
+	
+	<delete id="deleteUserById">
+		delete from t_user where id=#{id}
+	</delete>
 </mapper>
