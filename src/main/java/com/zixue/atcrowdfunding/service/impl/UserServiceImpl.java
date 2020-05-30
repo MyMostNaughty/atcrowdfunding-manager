@@ -56,4 +56,24 @@ public class UserServiceImpl implements UserService {
 	public void deleteUserById(Integer id) {
 		userDao.deleteUserById(id);
 	}
+
+	@Override
+	public void deleteUsers(Map<String, Object> map) {
+		userDao.deleteUsers(map);
+	}
+
+	@Override
+	public void insertUserRoles(Map<String, Object> map) {
+		userDao.insertUserRoles(map);
+	}
+
+	@Override
+	public void deleteUserRoles(Map<String, Object> map) {
+		userDao.deleteUserRoles(map);
+	}
+
+	@Override
+	public List<Integer> queryRoleidsByUserid(Integer id) {
+		return userDao.queryRoleidsByUserid(id);
+	}
 }

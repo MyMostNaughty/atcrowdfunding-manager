@@ -41,4 +41,26 @@
 	<delete id="deleteUserById">
 		delete from t_user where id=#{id}
 	</delete>
+	
+	<delete id="deleteUsers">
+		delete from t_user where id in 
+		<foreach collection="userids" item="userid" open="(" close=")" separator=",">
+			#{userid}
+		</foreach>
+	</delete>
+	
+	<insert id="insertUserRoles">
+		insert into t_user_role (userid,roleid) values 
+		<foreach collection="roleids" item="roleid" separator=",">
+			(#{userid},#{roleid})
+		</foreach>
+	</insert>
+	
+	<delete id="deleteUserRoles">
+		delete from t_user_role where userid = #{userid} and roleid in 
+		<foreach collection="roleids" item="roleid" open="(" close=")" separator=",">
+			#{roleid}
+		</foreach>
+	</delete>
+	
 </mapper>

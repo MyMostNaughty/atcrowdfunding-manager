@@ -1,28 +1,24 @@
 package com.zixue.atcrowdfunding.controller;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.activiti.engine.impl.cmd.AddCommentCmd;
-import org.activiti.engine.impl.cmd.DeleteUserCmd;
-import org.apache.ibatis.annotations.Insert;
-import org.apache.poi.ss.formula.functions.Index;
-import org.h2.util.New;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.remoting.support.RemoteInvocationResult;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.zixue.atcrowdfunding.bean.AjaxResult;
 import com.zixue.atcrowdfunding.bean.Page;
+import com.zixue.atcrowdfunding.bean.Role;
 import com.zixue.atcrowdfunding.bean.User;
+import com.zixue.atcrowdfunding.service.RoleService;
 import com.zixue.atcrowdfunding.service.UserService;
 
 @Controller
@@ -31,6 +27,24 @@ public class UserController {
 	
 	@Autowired
 	private UserService userService;
+	@Autowired
+	private RoleService poleService;
+	
+	@ResponseBody
+	@RequestMapping("deleteUsers")
+	public Object deleteUsesr(Integer[] userid){
+		AjaxResult result = new AjaxResult();
+		try {
+			Map<String,Object> map = new HashMap<String,Object>();
+			map.put("userids", userid);
+			userService.deleteUsers(map);
+			result.setSuccess(true);
+		} catch (Exception e) {
+			result.setSuccess(false);
+			e.printStackTrace();
+		}
+		return result;
+	}
 	
 	@ResponseBody
 	@RequestMapping("deleteUser")
@@ -65,6 +79,67 @@ public class UserController {
 		User user = userService.queryById(id);
 		model.addAttribute("user", user);
 		return "user/edit";
+	}
+	
+	@RequestMapping("assign")
+	public String assign(Integer id, Model model){
+		User user = userService.queryById(id);
+		model.addAttribute("user", user);
+		
+		List<Role> roles = poleService.queryAll();
+		model.addAttribute("roles", roles);
+		
+		List<Role> assingedRoles = new ArrayList<>();
+		List<Role> unassingedRoles = new ArrayList<>();
+		
+		// 获取关系表的数据
+		List<Integer> roleids = userService.queryRoleidsByUserid(id);
+		
+		for (Role role : roles) {
+			if(roleids.contains(role.getId())){
+				assingedRoles.add(role);
+			}else{
+				unassingedRoles.add(role);
+			}
+		}
+		
+		model.addAttribute("assingedRoles", assingedRoles);    // 已分配
+		model.addAttribute("unassingedRoles", unassingedRoles);// 未分配
+		return "user/assign";
+	}
+	
+	@ResponseBody
+	@RequestMapping("/doAssign")
+	public Object doAssign(Integer userid, Integer[] unassignroleids){
+		AjaxResult result = new AjaxResult();
+		try{
+			// 增加关系表数据
+			Map<String, Object> map = new HashMap<String,Object>();
+			map.put("userid", userid);
+			map.put("roleids", unassignroleids);
+			userService.insertUserRoles(map);
+			result.setSuccess(true);
+		}catch (Exception e) {
+			result.setSuccess(false);
+		}
+		return result;
+	}
+	
+	@ResponseBody
+	@RequestMapping("/dounAssign")
+	public Object dounAssign(Integer userid, Integer[] assignroleids){
+		AjaxResult result = new AjaxResult();
+		try{
+			// 删除关系表数据
+			Map<String, Object> map = new HashMap<String,Object>();
+			map.put("userid", userid);
+			map.put("roleids", assignroleids);
+			userService.deleteUserRoles(map);
+			result.setSuccess(true);
+		}catch (Exception e) {
+			result.setSuccess(false);
+		}
+		return result;
 	}
 	
 	@ResponseBody
