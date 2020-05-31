@@ -1,15 +1,16 @@
 package com.zixue.atcrowdfunding.controller;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.zixue.atcrowdfunding.bean.AjaxResult;
 import com.zixue.atcrowdfunding.bean.Permission;
 import com.zixue.atcrowdfunding.service.PermissionService;
 
@@ -20,11 +21,89 @@ public class PermissionController {
 	@Autowired
 	private PermissionService permissionService;
 	
+	@ResponseBody
+	@RequestMapping("/delete")
+	public Object delete(Integer id){
+		AjaxResult result = new AjaxResult();
+		
+		try {
+			permissionService.deletePermissionById(id);
+			result.setSuccess(true);
+		} catch (Exception e) {
+			e.printStackTrace();
+			result.setSuccess(false);
+		}
+		return result;
+	}
+	
+	@RequestMapping("/edit")
+	public String edit(Integer id, Model model){
+		Permission permission = permissionService.queryRootpermissionById(id);
+		model.addAttribute("permission",permission);
+		return "permission/edit";
+	}
+	
+	@RequestMapping("/add")
+	public String add(){
+		return "permission/add";
+	}
+	
+	@ResponseBody
+	@RequestMapping("/update")
+	public Object update(Permission permission){
+		AjaxResult result = new AjaxResult();
+		
+		try {
+			permissionService.updatePermission(permission);
+			result.setSuccess(true);
+		} catch (Exception e) {
+			e.printStackTrace();
+			result.setSuccess(false);
+		}
+		return result;
+	}
+	
+	@ResponseBody
+	@RequestMapping("/insert")
+	public Object insert(Permission permission){
+		AjaxResult result = new AjaxResult();
+		
+		try {
+			permissionService.insertPermission(permission);
+			result.setSuccess(true);
+		} catch (Exception e) {
+			e.printStackTrace();
+			result.setSuccess(false);
+		}
+		return result;
+	}
+	
 	@RequestMapping("/index")
 	public String index(){
 		return "permission/index";
 	}
 	
+	@ResponseBody
+	@RequestMapping("/loadAssignData")
+	public Object loadAssignData(Integer roleid){
+		List<Permission> permissions = new ArrayList<Permission>();
+		// 获取当前角色已经分配的许可信息
+		List<Integer> permissionids = permissionService.queryPermissionByRoleid(roleid);
+		Map<Integer, Permission> permissionMap = permissionService.queryAllMap();
+		for (Permission p : permissionMap.values()) {
+			if(permissionids.contains(p.getId())){
+				p.setChecked(true);
+			}
+			Permission child = p;
+			if(child.getPid() == 0){
+				permissions.add(p);
+			}else{
+				Permission parent = permissionMap.get(child.getPid());
+				parent.getChildren().add(child);
+			}
+		}
+		return permissions;
+	}
 	@ResponseBody
 	@RequestMapping("/loadData")
 	public Object loadData(){
